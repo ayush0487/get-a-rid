@@ -46,19 +46,14 @@ async function connectDB() {
     try {
         // Set mongoose options to prevent buffering
         mongoose.set('bufferCommands', false);
-        mongoose.set('bufferMaxEntries', 0);
         
         await mongoose.connect(mongoUri, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
             serverSelectionTimeoutMS: 30000, // 30 seconds
             socketTimeoutMS: 45000, // 45 seconds
             connectTimeoutMS: 30000, // 30 seconds
             maxPoolSize: 10, // Maintain up to 10 socket connections
             serverSelectionRetryDelayMS: 5000, // Keep trying to send operations for 5 seconds
             heartbeatFrequencyMS: 10000, // 10 seconds
-            bufferMaxEntries: 0, // Disable mongoose buffering
-            bufferCommands: false, // Disable mongoose buffering
         });
         isConnected = true;
         console.log('Connected to MongoDB successfully');
