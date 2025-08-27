@@ -4,6 +4,11 @@ import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+// Set debug environment for production
+if (process.env.NODE_ENV === 'production') {
+    process.env.DEBUG = '';
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
