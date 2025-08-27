@@ -5,18 +5,18 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "build": "echo 'No build step required'",
+    "build": "npm install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
-    "node": ">=18.x"
+    "node": "18.x"
   },
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "A ride-sharing application built with Node.js and Express",
   "dependencies": {
-    "bcryptjs": "^3.0.2",
-    "express": "^4.21.2",
+    "bcryptjs": "^2.4.3",
+    "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.17.1"
   },
