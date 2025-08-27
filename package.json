@@ -8,6 +8,7 @@
   "dependencies": {
     "bcryptjs": "2.4.3",
     "debug": "4.3.4",
+    "dotenv": "^17.2.1",
     "express": "4.19.2",
     "jsonwebtoken": "9.0.2",
     "mongoose": "8.8.0"
@@ -16,6 +17,7 @@
     "build": "npm install --production",
     "start": "node server.js",
     "dev": "node server.js",
+    "test-mongo": "node test-mongo.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "type": "module",

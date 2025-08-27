@@ -3,6 +3,10 @@ import mainrouter from './routes/index.js'
 import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 
 // Set debug environment for production
 if (process.env.NODE_ENV === 'production') {
@@ -32,7 +36,18 @@ async function connectDB() {
     if (isConnected) return;
     
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/bla_bla_travel';
+    
+    // Debug logging (with password masked)
+    const maskedUri = mongoUri.replace(/:[^:@]*@/, ':***@');
+    console.log('Attempting to connect to MongoDB...');
+    console.log('Connection string:', maskedUri);
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    
     try {
+        // Set mongoose options to prevent buffering
+        mongoose.set('bufferCommands', false);
+        mongoose.set('bufferMaxEntries', 0);
+        
         await mongoose.connect(mongoUri, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
@@ -140,9 +155,32 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// For development
+// Startup function
+async function startServer() {
+    try {
+        // Connect to database first
+        console.log('Starting server...');
+        await connectDB();
+        
+        // Start the server only in development
+        if (process.env.NODE_ENV !== 'production') {
+            app.listen(port, () => {
+                console.log(`App listening on port ${port}!`);
+                console.log(`Health check: http://localhost:${port}/api/health`);
+            });
+        }
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+}
+
+// Start the server
 if (process.env.NODE_ENV !== 'production') {
-    app.listen(port, () => console.log(`App listening on port ${port}!`));
+    startServer();
+} else {
+    // In production, ensure DB connection is established
+    connectDB().catch(console.error);
 }
 
 export default app;
