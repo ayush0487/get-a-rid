@@ -1,0 +1,25 @@
+[
+  {
+    "id": "1755452177881",
+    "driverEmail": "ag@gmail.com",
+    "driverName": "akash",
+    "from": "haryana ",
+    "to": "panchkula",
+    "departureDate": "2024-01-01",
+    "departureTime": "10:11",
+    "totalSeats": 3,
+    "availableSeats": 3,
+    "price": 111,
+    "applicants": [
+      {
+        "passengerEmail": "ayush0487negi0487@gmail.com",
+        "passengerName": "ayush",
+        "message": "ewdcxsc",
+        "appliedAt": "2025-08-17T17:37:55.456Z",
+        "status": "pending"
+      }
+    ],
+    "status": "active",
+    "createdAt": "2025-08-17T17:36:17.881Z"
+  }
+]

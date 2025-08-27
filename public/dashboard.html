@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ride Listing - Bla Bla Travel</title>
+   <link rel="stylesheet" href="./css/dashboard.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-brand">
+                <a href="index.html" class="logo">RideShare</a>
+                <div class="nav-links">
+                    <a href="#" id="findRidesBtn">Find Rides</a>
+                    <a href="#" id="postRideBtn">Post a Ride</a>
+                    <a href="#" id="notificationsBtn">Notifications</a>
+                    <a href="#" id="passengerRequestsBtn">Passenger Requests</a>
+                </div>
+            </div>
+            <div class="user-profile">
+                <div class="avatar" id="userAvatar">A</div>
+                <span class="username" id="userName">Loading...</span>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <h1 class="page-title">Available Rides</h1>
+        <p class="page-subtitle">Choose from our selection of comfortable rides</p>
+        
+        <div class="rides-placeholder">
+
+            <div id="defaultContent">
+                <p class="placeholder-text">
+                    Welcome to your ride dashboard! Click "Post a Ride" to share a ride or "Find Rides" to search for available rides.
+                </p>
+            </div>
+            <div id="postings">
+               <form id="postRideForm" action="/api/rides" method="POST">
+                <input type="text" name="source" placeholder="From (Source City)" id="source_from" required>
+                <input type="text" name="destination" placeholder="To (Destination City)" id="going-to" required>
+                <div class="form-row">
+                    <input type="date" name="date" id="date" required>
+                    <input type="time" name="time" id="time" required>
+                    <input type="number" name="seats" placeholder="Available seats" id="seats" min="1" max="8" required>
+                    <input type="number" name="price" placeholder="Price per seat" id="price" min="0" step="0.01" required>
+                    <input type="text" name="vehicle" placeholder="Vehicle type (e.g., Sedan, SUV)" id="vehicle" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Post Ride</button>
+               </form>
+
+            </div>
+            <div id="find">
+                <form id="findRidesForm">
+                    <input type="text" name="source" id="source_from_search" placeholder="From (Source City)">
+                    <input type="text" name="destination" id="destination_to" placeholder="To (Destination City)">
+                    <button type="submit" class="btn btn-primary">Find Rides</button>
+                </form>
+                <div id="show_rides">
+                    <p class="placeholder-text">
+                        Enter your source and destination to find available rides.
+                    </p>
+                </div>
+            </div>
+            <div id="notifications">
+                <div class="notification-container">
+                    <p class="placeholder-text">
+                        No notifications available at the moment.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="./js/auth.js"></script>
+    <script src="./js/dashboard.js"></script>
+</body>
+</html>
