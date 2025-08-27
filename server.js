@@ -36,23 +36,86 @@ async function connectDB() {
         await mongoose.connect(mongoUri, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 30000, // 30 seconds
+            socketTimeoutMS: 45000, // 45 seconds
+            connectTimeoutMS: 30000, // 30 seconds
+            maxPoolSize: 10, // Maintain up to 10 socket connections
+            serverSelectionRetryDelayMS: 5000, // Keep trying to send operations for 5 seconds
+            heartbeatFrequencyMS: 10000, // 10 seconds
+            bufferMaxEntries: 0, // Disable mongoose buffering
+            bufferCommands: false, // Disable mongoose buffering
         });
         isConnected = true;
-        console.log('Connected to MongoDB');
+        console.log('Connected to MongoDB successfully');
+        
+        // Connection event listeners
+        mongoose.connection.on('error', (error) => {
+            console.error('MongoDB connection error:', error);
+            isConnected = false;
+        });
+        
+        mongoose.connection.on('disconnected', () => {
+            console.log('MongoDB disconnected');
+            isConnected = false;
+        });
+        
+        mongoose.connection.on('reconnected', () => {
+            console.log('MongoDB reconnected');
+            isConnected = true;
+        });
+        
     } catch (error) {
-        console.error('MongoDB connection error:', error);
+        console.error('MongoDB connection error:', error.message);
+        console.error('Connection string used:', mongoUri.replace(/:[^:@]*@/, ':***@')); // Hide password in logs
+        isConnected = false;
+        throw error;
     }
 }
 
 // Middleware to ensure database connection for API routes
 app.use('/api', async (req, res, next) => {
-    await connectDB();
-    next();
+    try {
+        await connectDB();
+        if (!isConnected || mongoose.connection.readyState !== 1) {
+            return res.status(503).json({
+                success: false,
+                message: 'Database connection unavailable. Please try again later.'
+            });
+        }
+        next();
+    } catch (error) {
+        console.error('Database connection middleware error:', error);
+        return res.status(503).json({
+            success: false,
+            message: 'Database connection failed. Please try again later.'
+        });
+    }
 });
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'OK', message: 'Server is running' });
+app.get('/api/health', async (req, res) => {
+    try {
+        const dbStatus = mongoose.connection.readyState;
+        const dbStates = {
+            0: 'disconnected',
+            1: 'connected',
+            2: 'connecting',
+            3: 'disconnecting'
+        };
+        
+        res.json({ 
+            status: 'OK', 
+            message: 'Server is running',
+            database: dbStates[dbStatus],
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(503).json({
+            status: 'ERROR',
+            message: 'Health check failed',
+            error: error.message
+        });
+    }
 });
 
 // Serve HTML files for specific routes
