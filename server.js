@@ -20,39 +20,61 @@ app.use(express.static(path.join(__dirname, 'public')))
 // API routes
 app.use('/api', mainrouter)
 
-// Serve HTML files for specific routes
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'))
-})
-
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'))
-})
-
-app.get('/signup', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'signup.html'))
-})
-
-app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'))
-})
+// Database connection
+let isConnected = false;
 
 async function connectDB() {
+    if (isConnected) return;
+    
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/bla_bla_travel';
     try {
-        await mongoose.connect(mongoUri);
+        await mongoose.connect(mongoUri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+        isConnected = true;
         console.log('Connected to MongoDB');
     } catch (error) {
         console.error('MongoDB connection error:', error);
     }
 }
 
-// Connect to database
-connectDB();
+// Middleware to ensure database connection for API routes
+app.use('/api', async (req, res, next) => {
+    await connectDB();
+    next();
+});
 
-// For Vercel, export the app instead of listening
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'OK', message: 'Server is running' });
+});
+
+// Serve HTML files for specific routes
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.get('/signup', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'signup.html'));
+});
+
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// Catch all handler for client-side routing
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// For development
 if (process.env.NODE_ENV !== 'production') {
-    app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+    app.listen(port, () => console.log(`App listening on port ${port}!`));
 }
 
 export default app;
