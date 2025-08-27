@@ -2,18 +2,24 @@
   "name": "bla-bla",
   "version": "1.0.0",
   "main": "server.js",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "bcryptjs": "2.4.3",
-    "express": "^4.21.2",
+    "debug": "4.3.4",
+    "express": "4.19.2",
     "jsonwebtoken": "9.0.2",
-    "mongoose": "^8.18.0"
+    "mongoose": "8.8.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "build": "npm install --production",
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "type": "module",
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "A ride-sharing application built with Node.js and Express"
 }
