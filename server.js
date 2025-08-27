@@ -35,7 +35,8 @@ let isConnected = false;
 async function connectDB() {
     if (isConnected) return;
     
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/bla_bla_travel';
+    const mongoUri = 'mongodb+srv://ayush0487negi0487:tlKe36k2v3p8oDWd@cluster0.xcfg2l.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+    
     
     // Debug logging (with password masked)
     const maskedUri = mongoUri.replace(/:[^:@]*@/, ':***@');
