@@ -1,5 +1,5 @@
 import express from 'express';
-import { postRide, getAllRides, searchRides, bookRide, updateRide, deleteRide } from '../controllers/rideController.js';
+import { postRide, getAllRides, searchRides, bookRide, updateRide, deleteRide, getUserBookings } from '../controllers/rideController.js';
 import { verifyToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -12,6 +12,9 @@ router.post('/', postRide);
 
 
 router.get('/', getAllRides);
+
+// Get user's bookings
+router.get('/my-bookings', getUserBookings);
 
 router.post('/search', searchRides);
 

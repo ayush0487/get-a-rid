@@ -9,15 +9,18 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         const postRideBtn = document.getElementById('postRideBtn');
         const findRidesBtn = document.getElementById('findRidesBtn');
+        const myBookingsBtn = document.getElementById('myBookingsBtn');
         const notificationsBtn = document.getElementById('notificationsBtn');
         const postingsForm = document.getElementById('postings');
         const findSection = document.getElementById('find');
+        const myBookingsSection = document.getElementById('myBookings');
         const notificationsSection = document.getElementById('notifications');
         const defaultContent = document.getElementById('defaultContent');
         const pageTitle = document.getElementsByClassName('page-title');
         const postRideForm = document.getElementById('postRideForm');
         const findRidesForm = document.getElementById('findRidesForm');
         const showRides = document.getElementById('show_rides');
+        const bookingsList = document.getElementById('bookings-list');
         const logoutBtn = document.getElementById('logoutBtn');
 
         
@@ -33,6 +36,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             defaultContent.style.display = 'none';
             postingsForm.classList.remove('show');
             findSection.classList.remove('show');
+            myBookingsSection.classList.remove('show');
             notificationsSection.classList.remove('show');
         }
 
@@ -50,6 +54,15 @@ document.addEventListener('DOMContentLoaded', async function() {
             hideAllSections();
             pageTitle[0].innerHTML = 'Find Rides';
             findSection.classList.add('show');
+        });
+
+        // My Bookings section
+        myBookingsBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            hideAllSections();
+            pageTitle[0].innerHTML = 'My Bookings';
+            myBookingsSection.classList.add('show');
+            loadUserBookings();
         });
 
       
@@ -496,5 +509,80 @@ document.addEventListener('DOMContentLoaded', async function() {
                     findRidesForm.dispatchEvent(new Event('submit'));
                 }
             }
+        }
+
+        // Function to load user's bookings
+        async function loadUserBookings() {
+            try {
+                bookingsList.innerHTML = '<p class="placeholder-text">Loading your bookings...</p>';
+                
+                const user = JSON.parse(localStorage.getItem('user') || 'null');
+                if (!user || !user.email) {
+                    bookingsList.innerHTML = '<p class="placeholder-text">Please login to view your bookings.</p>';
+                    return;
+                }
+
+                const token = localStorage.getItem('authToken');
+                const response = await fetch('/api/rides/my-bookings', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token ? `Bearer ${token}` : ''
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayUserBookings(result.bookings);
+                } else {
+                    if (response.status === 401) {
+                        bookingsList.innerHTML = '<p class="placeholder-text">Session expired. Please login again.</p>';
+                        return;
+                    }
+                    bookingsList.innerHTML = `<p class="placeholder-text">Error loading bookings: ${result.message}</p>`;
+                }
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                bookingsList.innerHTML = '<p class="placeholder-text">Failed to load bookings. Please check your internet connection and try again.</p>';
+            }
+        }
+
+        // Function to display user bookings
+        function displayUserBookings(bookings) {
+            if (!bookings || bookings.length === 0) {
+                bookingsList.innerHTML = '<p class="placeholder-text">You haven\'t booked any rides yet. Use "Find Rides" to book your first ride!</p>';
+                return;
+            }
+
+            let bookingsHTML = '<div class="bookings-list">';
+            bookings.forEach(booking => {
+                const ride = booking.rideId;
+                const bookingDate = new Date(booking.bookingDate).toLocaleDateString();
+                const rideDate = new Date(ride.date).toLocaleDateString();
+                const isPastRide = new Date(ride.date) < new Date();
+                
+                bookingsHTML += `
+                    <div class="booking-card ${isPastRide ? 'past-ride' : ''}">
+                        <div class="booking-header">
+                            <h3>${ride.source} → ${ride.destination}</h3>
+                            <span class="booking-price">₹${booking.totalPrice} (${booking.seatsBooked} seat${booking.seatsBooked > 1 ? 's' : ''})</span>
+                        </div>
+                        <div class="booking-details">
+                            <p><strong>Ride Date:</strong> ${rideDate}</p>
+                            <p><strong>Time:</strong> ${ride.time}</p>
+                            <p><strong>Seats Booked:</strong> ${booking.seatsBooked}</p>
+                            <p><strong>Vehicle:</strong> ${ride.vehicle}</p>
+                            <p><strong>Driver:</strong> ${ride.driverName}</p>
+                            <p><strong>Booked On:</strong> ${bookingDate}</p>
+                            <p class="booking-status ${booking.status}"><strong>Status:</strong> ${booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}</p>
+                            ${isPastRide ? '<p class="past-ride-label">✓ Completed</p>' : '<p class="upcoming-ride-label">🚗 Upcoming</p>'}
+                        </div>
+                    </div>
+                `;
+            });
+            bookingsHTML += '</div>';
+
+            bookingsList.innerHTML = bookingsHTML;
         }
 });

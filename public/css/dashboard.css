@@ -584,3 +584,121 @@
                 padding: 0.5rem;
             }
         }
+
+        /* Bookings Section Styles */
+        #myBookings {
+            display: none;
+        }
+
+        #myBookings.show {
+            display: block;
+        }
+
+        .bookings-container {
+            margin-top: 1rem;
+        }
+
+        .booking-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-left: 4px solid #8b5cf6;
+        }
+
+        .booking-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .booking-card.past-ride {
+            border-left-color: #6b7280;
+            opacity: 0.8;
+        }
+
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1rem;
+        }
+
+        .booking-header h3 {
+            font-size: 1.25rem;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .booking-price {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #059669;
+            background-color: #d1fae5;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        .booking-details p {
+            margin-bottom: 0.5rem;
+            color: #4b5563;
+        }
+
+        .booking-details strong {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .booking-status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .booking-status.confirmed {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+
+        .booking-status.cancelled {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .past-ride-label {
+            color: #6b7280;
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        .upcoming-ride-label {
+            color: #8b5cf6;
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        .bookings-list {
+            margin-top: 1rem;
+        }
+
+        /* Responsive design for bookings */
+        @media (max-width: 768px) {
+            .booking-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .booking-price {
+                align-self: flex-end;
+            }
+
+            .booking-card {
+                padding: 1rem;
+            }
+        }

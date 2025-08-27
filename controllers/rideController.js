@@ -1,4 +1,5 @@
 import Ride from '../models/app.js';
+import Booking from '../models/booking.js';
 
 
 export const postRide = async (req, res) => {
@@ -159,7 +160,7 @@ export const searchRides = async (req, res) => {
 export const bookRide = async (req, res) => {
     try {
         const { seatsToBook = 1 } = req.body;
-        const { email: userEmail } = req.user; // Get user email from JWT token
+        const { email: userEmail, username: userName } = req.user; // Get user info from JWT token
         const ride = await Ride.findById(req.params.id);
 
         if (!ride) {
@@ -194,15 +195,29 @@ export const bookRide = async (req, res) => {
         }
 
         if (ride.availableSeats >= seatsRequested) {
+            // Create booking record
+            const booking = new Booking({
+                rideId: ride._id,
+                userId: userEmail,
+                userName: userName,
+                seatsBooked: seatsRequested,
+                totalPrice: ride.price * seatsRequested,
+                status: 'confirmed'
+            });
+
+            // Update ride availability
             ride.availableSeats -= seatsRequested;
             ride.bookedSeats += seatsRequested;
 
+            // Save both booking and updated ride
+            await booking.save();
             await ride.save();
 
             res.status(200).json({ 
                 success: true, 
                 message: `Successfully booked ${seatsRequested} seat${seatsRequested > 1 ? 's' : ''}`, 
                 ride,
+                booking,
                 seatsBooked: seatsRequested
             });
         } else {
@@ -215,6 +230,34 @@ export const bookRide = async (req, res) => {
         res.status(500).json({ 
             success: false, 
             message: error.message 
+        });
+    }
+};
+
+// Get user's bookings
+export const getUserBookings = async (req, res) => {
+    try {
+        const { email: userEmail } = req.user; // Get user email from JWT token
+        
+        const bookings = await Booking.find({ 
+            userId: userEmail,
+            status: 'confirmed'
+        }).populate('rideId').sort({ bookingDate: -1 });
+        
+        // Filter out bookings where ride might have been deleted
+        const validBookings = bookings.filter(booking => booking.rideId);
+        
+        res.status(200).json({
+            success: true,
+            bookings: validBookings,
+            count: validBookings.length
+        });
+    } catch (error) {
+        console.error('Error fetching user bookings:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch bookings',
+            error: error.message
         });
     }
 };
