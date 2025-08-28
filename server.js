@@ -48,16 +48,13 @@ async function connectDB() {
         // Set mongoose options to prevent buffering
         mongoose.set('bufferCommands', false);
         
+        // Simple, modern connection with only supported options
         await mongoose.connect(mongoUri, {
             serverSelectionTimeoutMS: 30000, // 30 seconds
             socketTimeoutMS: 45000, // 45 seconds
-            connectTimeoutMS: 30000, // 30 seconds
-            maxPoolSize: 10, // Maintain up to 10 socket connections
-            serverSelectionRetryDelayMS: 5000, // Keep trying to send operations for 5 seconds
-            heartbeatFrequencyMS: 10000, // 10 seconds
         });
         isConnected = true;
-        console.log('Connected to MongoDB successfully');
+        console.log('✅ Connected to MongoDB successfully');
         
         // Connection event listeners
         mongoose.connection.on('error', (error) => {
