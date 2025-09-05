@@ -353,6 +353,39 @@ export const updateRide = async (req, res) => {
 };
 
 // Delete a ride (only by the driver who posted it)
+// Cancel a booking (by the user who booked it)
+export const cancelBooking = async (req, res) => {
+    try {
+        const bookingId = req.params.id;
+        const { email: userEmail } = req.user;
+        const booking = await Booking.findById(bookingId);
+        if (!booking) {
+            return res.status(404).json({ success: false, message: 'Booking not found' });
+        }
+        if (booking.userId !== userEmail) {
+            return res.status(403).json({ success: false, message: 'You can only cancel your own bookings' });
+        }
+        if (booking.status === 'cancelled') {
+            return res.status(400).json({ success: false, message: 'Booking already cancelled' });
+        }
+        booking.status = 'cancelled';
+        await booking.save();
+        // Update ride's bookedSeats and availableSeats
+        const ride = await Ride.findById(booking.rideId);
+        if (ride) {
+            ride.bookedSeats = Math.max(0, (ride.bookedSeats || 0) - booking.seatsBooked);
+            ride.availableSeats = (ride.availableSeats || 0) + booking.seatsBooked;
+            // Ensure availableSeats does not exceed total seats
+            if (ride.seats && ride.availableSeats > ride.seats) {
+                ride.availableSeats = ride.seats;
+            }
+            await ride.save();
+        }
+        res.status(200).json({ success: true, message: 'Booking cancelled successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
 export const deleteRide = async (req, res) => {
     try {
         const { email: userEmail } = req.user; // Get user email from JWT token

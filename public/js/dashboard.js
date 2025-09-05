@@ -561,7 +561,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const bookingDate = new Date(booking.bookingDate).toLocaleDateString();
                 const rideDate = new Date(ride.date).toLocaleDateString();
                 const isPastRide = new Date(ride.date) < new Date();
-                
+                const canCancel = !isPastRide && booking.status === 'confirmed';
                 bookingsHTML += `
                     <div class="booking-card ${isPastRide ? 'past-ride' : ''}">
                         <div class="booking-header">
@@ -577,6 +577,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                             <p><strong>Booked On:</strong> ${bookingDate}</p>
                             <p class="booking-status ${booking.status}"><strong>Status:</strong> ${booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}</p>
                             ${isPastRide ? '<p class="past-ride-label">✓ Completed</p>' : '<p class="upcoming-ride-label">🚗 Upcoming</p>'}
+                            ${canCancel ? `<button class="btn btn-danger cancel-booking-btn" data-booking-id="${booking._id}">Cancel</button>` : ''}
                         </div>
                     </div>
                 `;
@@ -584,5 +585,39 @@ document.addEventListener('DOMContentLoaded', async function() {
             bookingsHTML += '</div>';
 
             bookingsList.innerHTML = bookingsHTML;
+
+            // Add event listeners for cancel buttons
+            const cancelBtns = document.querySelectorAll('.cancel-booking-btn');
+            cancelBtns.forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const bookingId = btn.getAttribute('data-booking-id');
+                    if (confirm('Are you sure you want to cancel this booking?')) {
+                        await cancelBooking(bookingId);
+                    }
+                });
+            });
+        }
+
+        // Function to cancel a booking
+        async function cancelBooking(bookingId) {
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`/api/rides/cancel-booking/${bookingId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token ? `Bearer ${token}` : ''
+                    }
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert('Booking cancelled successfully.');
+                    loadUserBookings();
+                } else {
+                    alert('Failed to cancel booking: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error cancelling booking. Please try again.');
+            }
         }
 });
